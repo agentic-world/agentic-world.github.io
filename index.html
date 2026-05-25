@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitNexus — Install Guide · OpenCode + MCP · v1.6.3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ══════════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════════ */
+    :root {
+      --bg:            #0a0a08;
+      --bg-surface:    #111110;
+      --bg-elevated:   #181816;
+      --bg-terminal:   #131311;
+      --bg-term-head:  #1b1b19;
+
+      --text:          #e2e2db;
+      --text-muted:    #8a8a82;
+      --text-dim:      #4a4a44;
+      --text-inv:      #0a0a08;
+
+      --accent:        #b8f225;
+      --accent-dim:    #7aad0e;
+      --accent-glow:   rgba(184,242,37,0.18);
+
+      --hover:         #ffe033;
+      --hover-glow:    rgba(255,224,51,0.22);
+      --hover-strong:  rgba(255,224,51,0.55);
+
+      --border:        #252520;
+      --border-sub:    #1a1a17;
+
+      --dot-r: #ff5f57;
+      --dot-y: #febc2e;
+      --dot-g: #28c840;
+
+      --success: #28c840;
+
+      --font-disp: 'DM Serif Display', Georgia, serif;
+      --font-ui:   'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --t: 200ms var(--ease);
+    }
+
+    /* ══════════════════════════════════════════════
+       RESET
+    ══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      line-height: 1.7;
+      min-height: 100vh;
+      cursor: default;
+    }
+
+    ::selection { background: var(--hover); color: var(--text-inv); }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color var(--t), text-shadow var(--t);
+    }
+    a:hover {
+      color: var(--hover);
+      text-shadow: 0 0 10px var(--hover-strong), 0 0 24px var(--hover-glow);
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ══════════════════════════════════════════════
+       TOP BAR
+    ══════════════════════════════════════════════ */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 48px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      background: var(--bg-surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50%      { box-shadow: 0 0 0 5px transparent; }
+    }
+
+    .topbar span { color: var(--text-muted); }
+    .topbar .sep { color: var(--text-dim); margin: 0 2px; }
+
+    /* ══════════════════════════════════════════════
+       STEP BAR
+    ══════════════════════════════════════════════ */
+    .step-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .step-bar::-webkit-scrollbar { display: none; }
+
+    .step-bar-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 14px 0;
+      padding-right: 32px;
+      flex-shrink: 0;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 20px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color var(--t), text-shadow var(--t), border-color var(--t);
+    }
+
+    .step-item:hover {
+      color: var(--hover);
+      text-shadow: 0 0 8px var(--hover-strong), 0 0 18px var(--hover-glow);
+    }
+
+    .step-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .step-item .num {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .step-item.active .num,
+    .step-item:hover .num {
+      color: inherit;
+    }
+
+    /* ══════════════════════════════════════════════
+       HERO
+    ══════════════════════════════════════════════ */
+    .hero {
+      padding: 72px 48px 64px;
+      max-width: 1300px;
+      animation: fadeUp 0.7s var(--ease) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-title {
+      font-family: var(--font-ui);
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+
+    .hero-title .italic {
+      font-family: var(--font-disp);
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-title .boxed {
+      display: inline-block;
+      border: 3px solid var(--text);
+      padding: 2px 14px 0;
+      line-height: 1.15;
+    }
+
+    .hero-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.85;
+      margin-bottom: 40px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      letter-spacing: 0.04em;
+      cursor: default;
+      transition: color var(--t), border-color var(--t), text-shadow var(--t);
+    }
+
+    .badge:hover {
+      color: var(--hover);
+      border-color: rgba(255,224,51,0.35);
+      text-shadow: 0 0 10px var(--hover-strong);
+    }
+
+    .badge.primary {
+      background: var(--accent);
+      color: var(--text-inv);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .badge.primary:hover {
+      background: var(--hover);
+      border-color: var(--hover);
+      color: var(--text-inv);
+      text-shadow: none;
+    }
+
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: currentColor;
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+
+    /* ══════════════════════════════════════════════
+       DIVIDER
+    ══════════════════════════════════════════════ */
+    .divider {
+      height: 1px;
+      background: var(--border-sub);
+      margin: 0;
+    }
+
+    /* ══════════════════════════════════════════════
+       STEP SECTION
+    ══════════════════════════════════════════════ */
+    .step-section {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 80px;
+      padding: 80px 48px;
+      border-bottom: 1px solid var(--border-sub);
+      max-width: 1300px;
+      animation: fadeUp 0.6s var(--ease) 0.15s both;
+    }
+
+    .step-index {
+      position: sticky;
+      top: 88px;
+      align-self: start;
+    }
+
+    .step-number {
+      font-family: var(--font-disp);
+      font-size: 5.5rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+      transition: color var(--t), text-shadow var(--t);
+      cursor: default;
+    }
+
+    .step-number:hover {
+      color: var(--hover);
+      text-shadow: 0 0 30px var(--hover-strong), 0 0 60px var(--hover-glow);
+    }
+
+    .step-lbl {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+
+    .step-rule {
+      width: 30px;
+      height: 2px;
+      background: var(--accent);
+      margin-top: 8px;
+      transition: width var(--t), background var(--t);
+    }
+
+    .step-index:hover .step-rule {
+      width: 50px;
+      background: var(--hover);
+    }
+
+    .step-heading {
+      font-family: var(--font-ui);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text);
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .step-heading em {
+      font-family: var(--font-disp);
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .step-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.9;
+      max-width: 680px;
+    }
+
+    /* ══════════════════════════════════════════════
+       INLINE CODE TAG
+    ══════════════════════════════════════════════ */
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--bg-elevated);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      transition: color var(--t), background var(--t), text-shadow var(--t);
+      cursor: default;
+    }
+
+    .tag:hover {
+      color: var(--hover);
+      background: rgba(255,224,51,0.07);
+      text-shadow: 0 0 8px var(--hover-strong);
+    }
+
+    /* ══════════════════════════════════════════════
+       TERMINAL
+    ══════════════════════════════════════════════ */
+    .terminal {
+      background: var(--bg-terminal);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 28px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+
+    .terminal:hover {
+      border-color: rgba(255,224,51,0.12);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,224,51,0.06);
+    }
+
+    .term-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg-term-head);
+      border-bottom: 1px solid var(--border-sub);
+    }
+
+    .term-dots { display: flex; gap: 6px; }
+    .term-dots span {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .dot-r { background: var(--dot-r); }
+    .dot-y { background: var(--dot-y); }
+    .dot-g { background: var(--dot-g); }
+
+    .term-path {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+
+    .term-copy {
+      font-size: 11px;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 2px 8px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      transition: color var(--t), border-color var(--t), text-shadow var(--t);
+    }
+
+    .term-copy:hover {
+      color: var(--hover);
+      border-color: rgba(255,224,51,0.25);
+      text-shadow: 0 0 8px var(--hover-strong);
+    }
+
+    .term-body {
+      padding: 22px 24px;
+      line-height: 2;
+    }
+
+    .t-line {
+      display: flex;
+      gap: 10px;
+    }
+
+    .t-prompt { color: var(--text-dim); user-select: none; }
+    .t-cmd    { color: var(--text); }
+    .t-flag   { color: var(--accent); }
+    .t-comment{ color: #4e4e48; }
+
+    .t-progress {
+      margin-top: 12px;
+      padding-left: 24px;
+    }
+
+    .t-prog-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: -6px;
+      cursor: default;
+      transition: color var(--t), text-shadow var(--t), background var(--t);
+    }
+
+    .t-prog-item::before {
+      content: '→';
+      color: var(--accent-dim);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .t-prog-item:hover {
+      color: var(--hover);
+      text-shadow: 0 0 8px var(--hover-strong), 0 0 16px var(--hover-glow);
+    }
+
+    .t-prog-item.done {
+      background: rgba(184,242,37,0.07);
+      color: var(--accent);
+    }
+
+    .t-prog-item.done::before { color: var(--accent); }
+
+    .t-success {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--success);
+      font-size: 12.5px;
+      transition: text-shadow var(--t);
+    }
+
+    .t-success:hover {
+      text-shadow: 0 0 10px rgba(40,200,64,0.5);
+    }
+
+    /* ══════════════════════════════════════════════
+       FEATURE GRID
+    ══════════════════════════════════════════════ */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border-sub);
+      border: 1px solid var(--border-sub);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 32px;
+    }
+
+    .feat-card {
+      background: var(--bg-surface);
+      padding: 22px 24px;
+      transition: background var(--t);
+    }
+
+    .feat-card:hover { background: var(--bg-elevated); }
+
+    .feat-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+      transition: color var(--t), text-shadow var(--t);
+    }
+
+    .feat-card:hover .feat-label {
+      color: var(--hover);
+      text-shadow: 0 0 10px var(--hover-strong);
+    }
+
+    .feat-text {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* ══════════════════════════════════════════════
+       AFTER-TERMINAL NOTE
+    ══════════════════════════════════════════════ */
+    .after-note {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.9;
+      max-width: 680px;
+      margin-top: 28px;
+    }
+
+    /* ══════════════════════════════════════════════
+       GLOW ON HOVER — universal
+    ══════════════════════════════════════════════ */
+    .glow {
+      transition: color var(--t), text-shadow var(--t);
+      cursor: default;
+    }
+
+    .glow:hover {
+      color: var(--hover) !important;
+      text-shadow:
+        0 0 8px  var(--hover-strong),
+        0 0 20px var(--hover-glow),
+        0 0 40px rgba(255,224,51,0.1);
+    }
+
+    /* ══════════════════════════════════════════════
+       NOISE OVERLAY
+    ══════════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px;
+    }
+
+    /* ══════════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .topbar, .step-bar, .hero, .step-section { padding-left: 20px; padding-right: 20px; }
+      .step-section { grid-template-columns: 1fr; gap: 24px; }
+      .step-index { position: static; }
+      .step-number { font-size: 4rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .step-bar { gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── TOP BAR ─────────────────────────────────── -->
+  <div class="topbar">
+    <span class="topbar-dot"></span>
+    <span>INSTALL GUIDE</span>
+    <span class="sep">/</span>
+    <span>OPENCODE + MCP</span>
+    <span class="sep">/</span>
+    <span>V1.6.3</span>
+  </div>
+
+  <!-- ── HERO ───────────────────────────────────── -->
+  <header class="hero">
+    <h1 class="hero-title">
+      Set up <span class="italic">GitNexus</span><br />
+      in <span class="boxed">six steps</span>
+    </h1>
+    <p class="hero-desc">
+      Index your codebase into a knowledge graph, expose it through MCP, and give your
+      coding agent real architectural awareness. Everything below runs locally on your
+      machine.
+    </p>
+    <div class="badge-row">
+      <span class="badge primary"><span class="badge-dot"></span>Local first</span>
+      <span class="badge">14 languages</span>
+      <span class="badge">Tree-sitter</span>
+      <span class="badge">LadybugDB</span>
+      <span class="badge">MCP server</span>
+      <span class="badge">PolyForm Noncommercial</span>
+    </div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- ── STEP NAV BAR ───────────────────────────── -->
+  <nav class="step-bar">
+    <span class="step-bar-label">STEPS</span>
+    <span class="step-item active" onclick="scrollTo('s1')">
+      <span class="num">01</span> Index the repo
+    </span>
+    <span class="step-item" onclick="scrollTo('s2')">
+      <span class="num">02</span> Edit AGENTS.md
+    </span>
+    <span class="step-item" onclick="scrollTo('s3')">
+      <span class="num">03</span> Configure OpenCode
+    </span>
+    <span class="step-item" onclick="scrollTo('s4')">
+      <span class="num">04</span> Open the web GUI
+    </span>
+    <span class="step-item" onclick="scrollTo('s5')">
+      <span class="num">05</span> Run locally
+    </span>
+    <span class="step-item" onclick="scrollTo('s6')">
+      <span class="num">06</span> Reindex on change
+    </span>
+  </nav>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 01
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s1">
+    <aside class="step-index">
+      <div class="step-number glow">01</div>
+      <div class="step-lbl">Index</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Run <em>analyze</em> in your project root</h2>
+      <p class="step-body">
+        Open a terminal at the root of your repository. One command does everything:
+        parses every file, resolves imports across files, builds the call graph, runs
+        community detection, traces execution flows, and writes the index to a local
+        <span class="tag">.gitnexus</span> folder.
+      </p>
+
+      <div class="terminal" id="term1">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">~/projects/your-repo — zsh</span>
+          <span class="term-copy" data-target="term1">Copy</span>
+        </div>
+        <div class="term-body">
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">npx gitnexus analyze</span>
+          </div>
+          <div class="t-line">
+            <span class="t-comment"># for non-git folders</span>
+          </div>
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">npx gitnexus analyze <span class="t-flag">--skip-git</span></span>
+          </div>
+
+          <div class="t-progress">
+            <div class="t-prog-item done">walking file tree</div>
+            <div class="t-prog-item done">parsing with tree-sitter</div>
+            <div class="t-prog-item done">resolving imports + heritage</div>
+            <div class="t-prog-item done">running community detection</div>
+            <div class="t-prog-item">tracing execution flows</div>
+            <div class="t-prog-item">building hybrid search index</div>
+          </div>
+
+          <div class="t-success">
+            ✓ indexed · skills installed · AGENTS.md created
+          </div>
+        </div>
+      </div>
+
+      <p class="after-note">
+        After this finishes you will see a few new files in your project. There is an
+        <span class="tag">AGENTS.md</span>, a <span class="tag">CLAUDE.md</span>, and a folder at
+        <span class="tag">.claude/skills</span> with four agent skills inside.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Exploring</div>
+          <p class="feat-text">Navigate unfamiliar code using the knowledge graph instead of grep.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Debugging</div>
+          <p class="feat-text">Trace bugs through call chains with full upstream and downstream context.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 02
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s2">
+    <aside class="step-index">
+      <div class="step-number glow">02</div>
+      <div class="step-lbl">Agents</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Edit <em>AGENTS.md</em> to match your stack</h2>
+      <p class="step-body">
+        The generated <span class="tag">AGENTS.md</span> tells every agent how to use the index.
+        Open it and add any project-specific context: language conventions, module boundaries,
+        forbidden patterns, or deployment constraints. Agents read this file automatically on
+        every task.
+      </p>
+
+      <div class="terminal" id="term2">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">~/projects/your-repo — zsh</span>
+          <span class="term-copy" data-target="term2">Copy</span>
+        </div>
+        <div class="term-body">
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">code AGENTS.md</span>
+          </div>
+          <div class="t-line">
+            <span class="t-comment"># or open with any editor</span>
+          </div>
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">vim AGENTS.md</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Context aware</div>
+          <p class="feat-text">Agents know your module structure before touching a single file.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Conventions</div>
+          <p class="feat-text">Encode naming rules, patterns to avoid, and preferred libraries.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 03
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s3">
+    <aside class="step-index">
+      <div class="step-number glow">03</div>
+      <div class="step-lbl">Config</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Configure <em>OpenCode</em> to use the MCP server</h2>
+      <p class="step-body">
+        Add the GitNexus MCP server to your <span class="tag">opencode.json</span>. This exposes
+        the knowledge graph through a local socket so OpenCode can query call graphs, resolve
+        symbols, and trace execution paths without leaving your machine.
+      </p>
+
+      <div class="terminal" id="term3">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">opencode.json</span>
+          <span class="term-copy" data-target="term3">Copy</span>
+        </div>
+        <div class="term-body" style="line-height:1.75">
+<pre style="color:var(--text-muted);font-size:12.5px;white-space:pre-wrap">{
+  <span style="color:var(--accent)">"mcpServers"</span>: {
+    <span style="color:var(--accent)">"gitnexus"</span>: {
+      <span style="color:var(--accent)">"command"</span>: <span style="color:#8bdd6e">"npx"</span>,
+      <span style="color:var(--accent)">"args"</span>: [<span style="color:#8bdd6e">"gitnexus"</span>, <span style="color:#8bdd6e">"mcp"</span>]
+    }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Local socket</div>
+          <p class="feat-text">Zero network latency. The MCP server runs as a local process alongside OpenCode.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Tool exposure</div>
+          <p class="feat-text">Exposes graph-query, symbol-resolve, and call-trace as callable agent tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 04
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s4">
+    <aside class="step-index">
+      <div class="step-number glow">04</div>
+      <div class="step-lbl">GUI</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Open the <em>web GUI</em> to explore the graph</h2>
+      <p class="step-body">
+        GitNexus ships a local web interface for visualising the knowledge graph. Run the
+        command below and open <span class="tag">http://localhost:4242</span> in your browser
+        to see the full call graph, community clusters, and execution traces rendered
+        interactively.
+      </p>
+
+      <div class="terminal" id="term4">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">~/projects/your-repo — zsh</span>
+          <span class="term-copy" data-target="term4">Copy</span>
+        </div>
+        <div class="term-body">
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">npx gitnexus gui</span>
+          </div>
+          <div class="t-line" style="padding-top:4px;">
+            <span class="t-comment">→ server listening on http://localhost:4242</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Graph view</div>
+          <p class="feat-text">Zoom into any module and see all callers, callees, and cross-file dependencies.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Communities</div>
+          <p class="feat-text">Automatically detected clusters reveal the real architecture of your codebase.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 05
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s5">
+    <aside class="step-index">
+      <div class="step-number glow">05</div>
+      <div class="step-lbl">Run</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Run <em>OpenCode</em> inside your project</h2>
+      <p class="step-body">
+        Start OpenCode from the root of the indexed repository. It will automatically detect
+        <span class="tag">AGENTS.md</span> and connect to the running MCP server. Your agent
+        now has full architectural context on every message.
+      </p>
+
+      <div class="terminal" id="term5">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">~/projects/your-repo — zsh</span>
+          <span class="term-copy" data-target="term5">Copy</span>
+        </div>
+        <div class="term-body">
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">opencode</span>
+          </div>
+          <div class="t-line" style="padding-top:4px;">
+            <span class="t-comment">→ detected AGENTS.md · loading gitnexus skills</span>
+          </div>
+          <div class="t-line">
+            <span class="t-comment">→ MCP server connected · graph ready</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Auto-detect</div>
+          <p class="feat-text">OpenCode reads <span class="tag">AGENTS.md</span> and activates graph skills automatically.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Zero config</div>
+          <p class="feat-text">No flags needed. If the MCP server is running and the index exists, it just works.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       STEP 06
+  ══════════════════════════════════════════════ -->
+  <section class="step-section" id="s6" style="border-bottom: none;">
+    <aside class="step-index">
+      <div class="step-number glow">06</div>
+      <div class="step-lbl">Reindex</div>
+      <div class="step-rule"></div>
+    </aside>
+    <div>
+      <h2 class="step-heading">Reindex on <em>change</em></h2>
+      <p class="step-body">
+        The index does not update automatically. After large refactors, branch switches, or
+        dependency upgrades, re-run analyze to keep the graph accurate. For day-to-day work
+        the existing index stays valid across minor edits.
+      </p>
+
+      <div class="terminal" id="term6">
+        <div class="term-head">
+          <div class="term-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="term-path">~/projects/your-repo — zsh</span>
+          <span class="term-copy" data-target="term6">Copy</span>
+        </div>
+        <div class="term-body">
+          <div class="t-line">
+            <span class="t-comment"># after a big refactor or branch switch</span>
+          </div>
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">npx gitnexus analyze</span>
+          </div>
+          <div class="t-line" style="padding-top:4px;">
+            <span class="t-comment"># watch mode (re-runs on file save)</span>
+          </div>
+          <div class="t-line">
+            <span class="t-prompt">$</span>
+            <span class="t-cmd">npx gitnexus analyze <span class="t-flag">--watch</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feat-card">
+          <div class="feat-label">Watch mode</div>
+          <p class="feat-text">The <span class="tag">--watch</span> flag re-indexes automatically whenever files change on disk.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-label">Incremental</div>
+          <p class="feat-text">Only changed files are re-parsed; large repos reindex in seconds, not minutes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       JS
+  ══════════════════════════════════════════════ -->
+  <script>
+    /* ── Step bar active state on scroll ── */
+    const sections = ['s1','s2','s3','s4','s5','s6'];
+    const stepItems = document.querySelectorAll('.step-item');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = sections.indexOf(e.target.id);
+          stepItems.forEach((item, i) => item.classList.toggle('active', i === idx));
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    /* ── Smooth scroll ── */
+    function scrollTo(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ── Copy button ── */
+    document.querySelectorAll('.term-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const termId = btn.dataset.target;
+        const body = document.querySelector(`#${termId} .term-body`);
+        if (!body) return;
+
+        const text = body.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = 'Copied!';
+          btn.style.color = 'var(--hover)';
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.style.color = '';
+          }, 1800);
+        });
+      });
+    });
+
+    /* ── Apply glow to interactive text ── */
+    document.querySelectorAll('.step-heading, .hero-title, .feat-label, .step-bar-label, .term-path')
+      .forEach(el => {
+        if (!el.classList.contains('glow')) el.classList.add('glow');
+      });
+
+    /* ── Animated progress items on scroll into view ── */
+    const progItems = document.querySelectorAll('.t-prog-item');
+    const progObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const items = e.target.querySelectorAll('.t-prog-item');
+          items.forEach((item, i) => {
+            setTimeout(() => item.style.opacity = '1', i * 90);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.t-progress').forEach(el => {
+      el.querySelectorAll('.t-prog-item').forEach(item => item.style.opacity = '0');
+      progObserver.observe(el);
+    });
+  </script>
+</body>
+</html>
